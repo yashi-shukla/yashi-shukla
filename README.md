@@ -6,6 +6,8 @@
 - ⚡ Fun fact: I love to draw and travel
 
 
+[<img src="https://yashi-shukla.vercel.app//api/spotify-playing" alt="Yashi Spotify Playing" width="350" />](https://open.spotify.com/user/yashi20)
+
 ### Connect with me:
 
 [<img align="left" alt="yashi | Twitter" width="22px" src="https://cdn.jsdelivr.net/npm/simple-icons@v3/icons/twitter.svg" />][twitter]
