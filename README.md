@@ -9,8 +9,8 @@
 
 ### Connect with me:
 
-[<img align="left" alt="yashi | Twitter" width="22px" src="https://cdn.jsdelivr.net/npm/simple-icons@v3/icons/twitter.svg" />][twitter]
-[<img align="left" alt="yashi | LinkedIn" width="22px" src="https://cdn.jsdelivr.net/npm/simple-icons@v3/icons/linkedin.svg" />][linkedin]
+[<img align="left" alt="yashi | Twitter" width="22px" src="https://img.icons8.com/color/50/000000/twitter--v1.png" />][twitter]
+[<img align="left" alt="yashi | LinkedIn" width="22px" src="https://img.icons8.com/color/48/000000/linkedin.png" />][linkedin]
 
 <br />
 
@@ -34,5 +34,5 @@
 <br />
 
 
-[twitter]: https://twitter.com/yashi54731642
-[linkedin]: https://www.linkedin.com/in/yashi-shukla-77404717a/
+[twitter]: https://twitter.com/yashiishukla
+[linkedin]: https://www.linkedin.com/in/yashi-shukla/
