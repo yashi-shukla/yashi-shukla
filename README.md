@@ -1,8 +1,8 @@
 ### Hi there, I'm Yashi 👋
 
-- 🌱 I’m currently learning Apache Spark
-- :name_badge: I’m looking for a Data Engineer position!
-- 🥅 2021 Goals: Contribute more to Open Source projects
+- 🌱 I’m currently learning Airflow and Superset
+- :name_badge: I’m working as a Data Engineer!
+- 🥅 2022 Goals: Contribute more to Open Source projects
 - ⚡ Fun fact: I love to draw and travel
 
 &nbsp; <br> [![Spotify](https://yashi-shukla.vercel.app//api/spotify)](https://open.spotify.com/user/yashi20)
