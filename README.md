@@ -2,7 +2,7 @@
 
 - 🌱 I’m currently learning Airflow and Superset
 - :name_badge: I’m working as a Data Engineer!
-- 🥅 2022 Goals: Contribute more to Open Source projects
+- 🥅 2023 Goals: Contribute more to Open Source projects
 - ⚡ Fun fact: I love to draw and travel
 
 &nbsp; <br> [![Spotify](https://yashi-shukla.vercel.app//api/spotify)](https://open.spotify.com/user/yashi20)
