@@ -6,9 +6,7 @@
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "15mb",
-        "runtime": "python3.9",
-        "includedFiles": ["templates/**"],
-        "installCommand": "pip install -r vercel-requirements.txt"
+        "runtime": "python3.9"
       }
     }
   ],
