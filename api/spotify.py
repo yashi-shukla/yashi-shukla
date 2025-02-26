@@ -14,15 +14,9 @@ from flask import Flask, Response, jsonify, render_template, abort, request, red
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Try to import colorgram for color extraction, but don't fail if it's not available
-try:
-    import colorgram
-    from PIL import Image
-    COLOR_EXTRACTION_AVAILABLE = True
-    logger.info("Color extraction is available")
-except ImportError:
-    COLOR_EXTRACTION_AVAILABLE = False
-    logger.warning("Color extraction is not available - using default colors")
+# No color extraction support - using predefined themes instead
+COLOR_EXTRACTION_AVAILABLE = False
+logger.info("Using predefined color themes")
 
 load_dotenv(find_dotenv())
 
@@ -49,11 +43,48 @@ AUTH_URL = "https://accounts.spotify.com/authorize"
 # Placeholder image for when album art is not available
 PLACEHOLDER_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADISURBVFhH7dY9CsJAFATgWXt/kHgEK/EICpZ6A2/jRbxBGlN4AU9g5R28gZbe77sYlmUTLFZhhDzIA0lmJRD2vTWCRZKkCb6pqoeUydIrKuqgiBjkRlEj8BRFRxblx8RxsKoavw59sfH4j41Sy7JMdrvdeeyPCeOga3a73fV9o9F4NS56CrPZTCEG/VEQML3QqLhYLM4VYliVRB6GpKxzUBoz8aHQ0Gw2k/1+f21ut1t5n8kDH4uiqEF/FGTgF/Otp/Of+RzU2qD/FWAAVoFLO+Fd7ogAAAAASUVORK5CYII="
 
-# Default Spotify colors
-DEFAULT_GRADIENT = "linear-gradient(to right, #1DB954, #191414)"
-DEFAULT_BACKGROUND = "191414"  # Spotify black
-DEFAULT_TEXT = "FFFFFF"  # White
-DEFAULT_ACCENT = "1DB954"  # Spotify green
+# Predefined color themes
+THEMES = {
+    "default": {
+        "gradient": "linear-gradient(to right, #1DB954, #191414)",
+        "background": "191414",
+        "text": "FFFFFF",
+        "accent": "1DB954"
+    },
+    "dark": {
+        "gradient": "linear-gradient(to right, #1DB954, #191414)",
+        "background": "191414",
+        "text": "FFFFFF",
+        "accent": "1DB954"
+    },
+    "light": {
+        "gradient": "linear-gradient(to right, #1ED760, #FFFFFF)",
+        "background": "FFFFFF",
+        "text": "191414",
+        "accent": "1ED760"
+    },
+    "colorful": {
+        "gradient": "linear-gradient(to right, #B026FF, #FF8A2E, #1DB954, #4062BB)",
+        "background": "0E1118",
+        "text": "FFFFFF",
+        "accent": "1DB954"
+    },
+    "purple": {
+        "gradient": "linear-gradient(to right, #7B4397, #DC2430)",
+        "background": "251431",
+        "text": "FFFFFF",
+        "accent": "DC2430"
+    },
+    "beach": {
+        "gradient": "linear-gradient(to right, #00C9FF, #92FE9D)",
+        "background": "002B40",
+        "text": "FFFFFF",
+        "accent": "92FE9D"
+    }
+}
+
+# Default theme
+DEFAULT_THEME = THEMES["default"]
 
 # In-memory cache for token
 token_cache = {
@@ -148,48 +179,11 @@ def barGen(barCount):
     return barCSS
 
 
-def extractColors(url, color_count=5):
-    """Extract dominant colors from an image URL"""
-    if not COLOR_EXTRACTION_AVAILABLE:
-        return []
-        
-    try:
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        img = Image.open(BytesIO(response.content))
-        colors = colorgram.extract(img, color_count)
-        return colors
-    except Exception as e:
-        logger.error(f"Error extracting colors: {str(e)}")
-        return []
-
-
-def gradientGen(url, count):
-    """Generate CSS gradient from image colors"""
-    # If color extraction isn't available, return the default gradient
-    if not COLOR_EXTRACTION_AVAILABLE:
-        return DEFAULT_GRADIENT
-        
-    try:
-        colors = extractColors(url, count + 2)
-        
-        # If we couldn't extract colors, return the default gradient
-        if not colors:
-            return DEFAULT_GRADIENT
-            
-        gradient = "linear-gradient(to right, "
-        
-        for i, color in enumerate(colors[:count]):
-            r, g, b = color.rgb.r, color.rgb.g, color.rgb.b
-            gradient += f"rgb({r},{g},{b})"
-            if i < count - 1:
-                gradient += ", "
-        
-        gradient += ")"
-        return gradient
-    except Exception as e:
-        logger.error(f"Error generating gradient: {str(e)}")
-        return DEFAULT_GRADIENT
+def getThemeGradient(theme_name=None):
+    """Get gradient for the specified theme"""
+    if not theme_name or theme_name not in THEMES:
+        return DEFAULT_THEME["gradient"]
+    return THEMES[theme_name]["gradient"]
 
 
 def loadImageB64(url):
@@ -208,6 +202,9 @@ def makeSVG(data, theme=None, background_color=None, border_color=None):
     contentBar = "".join(["<div class='bar'></div>" for i in range(barCount)])
     barCSS = barGen(barCount)
 
+    # Get theme properties
+    theme_data = THEMES.get(theme, DEFAULT_THEME)
+
     try:
         if data == {} or data.get("item") is None or data.get("item") == "None":
             contentBar = "" #Shows/Hides the EQ bar if no song is currently playing
@@ -224,28 +221,27 @@ def makeSVG(data, theme=None, background_color=None, border_color=None):
             item = data["item"]
             currentStatus = "Vibing to:"
         
-        # Handle images and colors
+        # Handle images
         if not item["album"]["images"]:
             image = PLACEHOLDER_IMAGE
-            barPalette = DEFAULT_GRADIENT
-            songPalette = DEFAULT_GRADIENT
         else:
             image_url = item["album"]["images"][1]["url"]
             image = loadImageB64(image_url)
-            # Use gradientGen with fallback to default colors if extraction fails
-            barPalette = gradientGen(image_url, 4)
-            songPalette = gradientGen(image_url, 2)
+            
+        # Use theme gradients
+        barPalette = theme_data["gradient"]
+        songPalette = theme_data["gradient"]
             
         artistName = item["artists"][0]["name"].replace("&", "&amp;")
         songName = item["name"].replace("&", "&amp;")
         songURI = item["external_urls"]["spotify"]
         artistURI = item["artists"][0]["external_urls"]["spotify"]
 
-        # Default colors if not provided
+        # Use theme colors if not provided by parameters
         if not background_color:
-            background_color = DEFAULT_BACKGROUND
+            background_color = theme_data["background"]
         if not border_color:
-            border_color = DEFAULT_BACKGROUND
+            border_color = background_color
 
         dataDict = {
             "contentBar": contentBar,
