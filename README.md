@@ -2,7 +2,7 @@
 
 - 🌱 I’m currently learning DBT
 - :name_badge: I’m working as a Data Engineer!
-- 🥅 2024 Goals: Contribute more to Open Source projects
+- 🥅 2025 Goals: Contribute more to Open Source projects
 - ⚡ Fun fact: I love to draw and travel
 
 &nbsp; <br> [![Spotify](https://yashi-shukla.vercel.app//api/spotify)](https://open.spotify.com/user/yashi20)
@@ -14,7 +14,7 @@
 
 <br />
 
-### Languages and Tools:
+### Skills:
 
 <img align="left" alt="Python" width="26px" src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/python/python.png" />
 <img align="left" alt="Azure" width="26px" src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/azure/azure.png" />
