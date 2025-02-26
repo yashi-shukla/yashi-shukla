@@ -4,9 +4,7 @@ import random
 import requests
 import logging
 import time
-import colorgram
 from io import BytesIO
-from PIL import Image
 from base64 import b64encode
 from functools import wraps
 from dotenv import load_dotenv, find_dotenv
@@ -15,6 +13,16 @@ from flask import Flask, Response, jsonify, render_template, abort, request, red
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# Try to import colorgram for color extraction, but don't fail if it's not available
+try:
+    import colorgram
+    from PIL import Image
+    COLOR_EXTRACTION_AVAILABLE = True
+    logger.info("Color extraction is available")
+except ImportError:
+    COLOR_EXTRACTION_AVAILABLE = False
+    logger.warning("Color extraction is not available - using default colors")
 
 load_dotenv(find_dotenv())
 
@@ -40,6 +48,12 @@ AUTH_URL = "https://accounts.spotify.com/authorize"
 
 # Placeholder image for when album art is not available
 PLACEHOLDER_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADISURBVFhH7dY9CsJAFATgWXt/kHgEK/EICpZ6A2/jRbxBGlN4AU9g5R28gZbe77sYlmUTLFZhhDzIA0lmJRD2vTWCRZKkCb6pqoeUydIrKuqgiBjkRlEj8BRFRxblx8RxsKoavw59sfH4j41Sy7JMdrvdeeyPCeOga3a73fV9o9F4NS56CrPZTCEG/VEQML3QqLhYLM4VYliVRB6GpKxzUBoz8aHQ0Gw2k/1+f21ut1t5n8kDH4uiqEF/FGTgF/Otp/Of+RzU2qD/FWAAVoFLO+Fd7ogAAAAASUVORK5CYII="
+
+# Default Spotify colors
+DEFAULT_GRADIENT = "linear-gradient(to right, #1DB954, #191414)"
+DEFAULT_BACKGROUND = "191414"  # Spotify black
+DEFAULT_TEXT = "FFFFFF"  # White
+DEFAULT_ACCENT = "1DB954"  # Spotify green
 
 # In-memory cache for token
 token_cache = {
@@ -136,6 +150,9 @@ def barGen(barCount):
 
 def extractColors(url, color_count=5):
     """Extract dominant colors from an image URL"""
+    if not COLOR_EXTRACTION_AVAILABLE:
+        return []
+        
     try:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
@@ -149,8 +166,17 @@ def extractColors(url, color_count=5):
 
 def gradientGen(url, count):
     """Generate CSS gradient from image colors"""
+    # If color extraction isn't available, return the default gradient
+    if not COLOR_EXTRACTION_AVAILABLE:
+        return DEFAULT_GRADIENT
+        
     try:
         colors = extractColors(url, count + 2)
+        
+        # If we couldn't extract colors, return the default gradient
+        if not colors:
+            return DEFAULT_GRADIENT
+            
         gradient = "linear-gradient(to right, "
         
         for i, color in enumerate(colors[:count]):
@@ -163,7 +189,7 @@ def gradientGen(url, count):
         return gradient
     except Exception as e:
         logger.error(f"Error generating gradient: {str(e)}")
-        return "linear-gradient(to right, #1DB954, #191414)"  # Default Spotify colors
+        return DEFAULT_GRADIENT
 
 
 def loadImageB64(url):
@@ -201,11 +227,12 @@ def makeSVG(data, theme=None, background_color=None, border_color=None):
         # Handle images and colors
         if not item["album"]["images"]:
             image = PLACEHOLDER_IMAGE
-            barPalette = "linear-gradient(to right, #1DB954, #191414)"
-            songPalette = "linear-gradient(to right, #1DB954, #191414)"
+            barPalette = DEFAULT_GRADIENT
+            songPalette = DEFAULT_GRADIENT
         else:
             image_url = item["album"]["images"][1]["url"]
             image = loadImageB64(image_url)
+            # Use gradientGen with fallback to default colors if extraction fails
             barPalette = gradientGen(image_url, 4)
             songPalette = gradientGen(image_url, 2)
             
@@ -216,9 +243,9 @@ def makeSVG(data, theme=None, background_color=None, border_color=None):
 
         # Default colors if not provided
         if not background_color:
-            background_color = "191414"  # Spotify black
+            background_color = DEFAULT_BACKGROUND
         if not border_color:
-            border_color = "191414"  # Spotify black
+            border_color = DEFAULT_BACKGROUND
 
         dataDict = {
             "contentBar": contentBar,
