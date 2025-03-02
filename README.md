@@ -5,6 +5,8 @@
 - 🥅 2025 Goals: Contribute more to Open Source projects
 - ⚡ Fun fact: I love to draw and travel
 
+### Currently Listening to:
+
 &nbsp; <br> [![Spotify](https://yashi-shukla.vercel.app//api/spotify)](https://open.spotify.com/user/yashi20)
 
 ### Connect with me:
